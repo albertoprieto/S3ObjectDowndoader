@@ -12,7 +12,9 @@ Fecha de modificación: 14 de octubre 2023
         -Se agregan parámetros al scroll para mantenerlo fijo:
          keep_on_top=True, no_titlebar=True
         -Se cambia título a 'Amazon S3 cfditoday'
-        
+        -El usuario ahora debe seleccionar la carpeta de destino (self.dest_folder)
+        -Valida que valor inicial sea menor o igual al final
+        -Limita la cantidad de folios por evento a descargar a 5000
 
 Versión: 1.0
 """
@@ -56,6 +58,7 @@ class DescargadorS3:
         self.s3 = boto3.resource('s3')
         self.filecount = 0
         self.ultima_descarga = ''
+        self.dest_folder = ''
 
         sg.theme('BrightColors') 
         self.layout = [
@@ -133,6 +136,7 @@ class DescargadorS3:
 
             folder_name = carpeta.lower()
 
+            folder_name = os.path.join(self.dest_folder,folder_name)
             if not os.path.isdir(folder_name):
                 os.mkdir(folder_name)
 
@@ -184,6 +188,17 @@ class DescargadorS3:
                     fin = values['inpfin'][2:]
 
                     if tipo in ['FP','GP','NP','AP']:
+
+                        if abs(int(fin) - int(inicio)) > 5000:
+                            diferencia = abs(int(fin) - int(inicio))
+                            sg.popup_error(f"El límite de descargas por evento es 5000, estás intentando descargar: {diferencia} ")
+                            break
+                        if inicio <= fin:
+                            pass
+                        else:
+                            sg.popup_error(f'Valor inicial {inicio} es superior al valor final {fin}, verifique')
+                            break
+
                         if len(tipo) != 2:
                             sg.popup_error(f'Tipo " {tipo} " No válido, verifique')
                             self.reset_layout()
@@ -194,6 +209,13 @@ class DescargadorS3:
                             sg.popup_error(f'Rango inválido " {fin} " verifique')
                             self.reset_layout()
                         else:
+                            self.dest_folder = sg.popup_get_folder("Selecciona la carpeta de destino para los archivos",
+                                                          title="Seleccionar carpeta")
+                            if not self.dest_folder:
+                                sg.popup_error('Se debe seleccionar una carpeta para descargar los archivos')
+                                break
+                            if not os.path.isdir(self.dest_folder):
+                                os.mkdir(self.dest_folder)
                             self.descargar_archivos_s3(tipo, inicio, fin)
                     else:
                         sg.popup_error(f'Tipo " {tipo} " No válido, verifique')
