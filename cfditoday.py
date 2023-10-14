@@ -6,6 +6,14 @@ Nombre del Script: cfditoday.py
 Descripción: Este script descarga archivos desde Amazon S3 en función de un rango y tipo especificados.
 Autor: Jose Alberto Prieto
 Fecha de Creación: 13 de octubre de 2023
+Fecha de modificación: 14 de octubre 2023
+    Modificaciones:
+        14 de octubre 2023
+        -Se agregan parámetros al scroll para mantenerlo fijo:
+         keep_on_top=True, no_titlebar=True
+        -Se cambia título a 'Amazon S3 cfditoday'
+        
+
 Versión: 1.0
 """
 
@@ -60,7 +68,7 @@ class DescargadorS3:
             [sg.Text(size=(200, 1), key='xmlout')],
             [sg.Text(size=(200, 1), key='pdfout')]
         ]
-        self.window = sg.Window('cfditoday', self.layout, size=(490, 280))
+        self.window = sg.Window('Amazon S3 cfditoday', self.layout, size=(490, 280))
 
     def reset_layout(self):
         """
@@ -83,7 +91,8 @@ class DescargadorS3:
             mensajes (list): Lista de mensajes a mostrar en la ventana emergente.
         """
         mensaje = "\n".join(mensajes)
-        sg.popup_scrolled(f"Archivos Descargados:\n{mensaje}")
+        #sg.popup_scrolled(f"Archivos Descargados:\n{mensaje}")
+        sg.popup_scrolled(f"Archivos Descargados:\n{mensaje}", keep_on_top=True, no_titlebar=True)
         self.window['inpini'].update('')
         self.window['inpfin'].update('')
         self.window['pdfout'].update(f'Última descarga: {str(self.ultima_descarga)}')
@@ -153,7 +162,7 @@ class DescargadorS3:
             self.mostrar_popup(archivos_descargados)
 
         if errores:
-            sg.popup_error("\n".join(errores))
+            sg.popup_error("\n".join(errores), keep_on_top=True, no_titlebar=True)
             self.filecount = 0
             self.window['ok_button'].update(disabled=False)
             self.window['inpini'].update('')
