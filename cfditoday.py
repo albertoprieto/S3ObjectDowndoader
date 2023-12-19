@@ -111,6 +111,7 @@ class DescargadorS3:
             inicio (str): Valor inicial del rango.
             fin (str): Valor final del rango.
         """
+        
         archivos_descargados = []
         errores = []
         for interval in range(int(inicio), int(fin) + 1):
